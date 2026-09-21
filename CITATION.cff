@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it."
+title: "legged-digital-twin: simulation-only physics-informed digital twin for a quadruped"
+version: 0.2.0
+authors:
+  - family-names: "Buronova"
+    given-names: "Gulnora"
+  - family-names: "Barnoeva"
+    given-names: "Zubayda"
+  - family-names: "Juraev"
+    given-names: "Ilhom"
+  - family-names: "Sharipov"
+    given-names: "Mirjon"
+  - family-names: "Yadgarova"
+    given-names: "Lola"
+  - family-names: "Muradova"
+    given-names: "Zarina"
+  - family-names: "Rajabov"
+    given-names: "Asadbek"
+license: MIT

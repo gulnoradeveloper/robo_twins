@@ -1,0 +1,19 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+results/*/data_*.npz
+
+# virtual muhit
+venv/
+.venv/
+
+# maxfiy fayllar
+.env
+
+# muharrir fayllari
+.idea/
+.vscode/
+
+# tizim fayllari
+.DS_Store
+Thumbs.db
