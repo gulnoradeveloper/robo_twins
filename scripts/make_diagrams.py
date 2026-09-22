@@ -31,7 +31,7 @@ def workflow(path):
            "Residual target a$_{res}$\n(v$_{plant}$\u2019 \u2212 v$_{nom}$\u2019)/\u0394t"]
     bot = ["Train models\n(ensemble NLL, MSE,\ndata-only MLP)",
            "Multi-step rollouts\n(25 steps, ID + OOD):\nRMSE, coverage, ECE",
-           "EnKF synchronisation\nwith noisy sensors:\nscaled state error",
+           "EnKF synchronization\nwith noisy sensors:\nscaled state error",
            "Outputs: state,\ncontact flags,\nuncertainty"]
     for x, t in zip(xs, top):
         box(ax, x, 0.66, w, h, t)
@@ -52,7 +52,7 @@ def architecture(path):
     fig, ax = plt.subplots(figsize=(6.4, 3.4)); ax.set_xlim(-0.02, 1.02); ax.set_ylim(0, 1); ax.axis("off")
     w, h = 0.27, 0.20
     A, B = 0.74, 0.40
-    box(ax, 0.02, A, w, h, "Twin state and torque\n(q, v, \u03c4)")
+    box(ax, 0.02, A, w, h, "Twin state and torque command\n(q, v, u)")
     box(ax, 0.365, A, w, h, "Nominal physics core\n(MuJoCo, nominal\nparameters)")
     box(ax, 0.71, A, w, h, "Nominal next state\n(q$_{nom}$\u2019, v$_{nom}$\u2019)")
     box(ax, 0.02, B, w, h, "Residual ensemble\n(M = 5): mean \u03bc$_m$,\nvariance \u03c3$_m^2$ of a", ACC)
@@ -61,7 +61,7 @@ def architecture(path):
     box(ax, 0.10, 0.03, 0.80, 0.20, "Ensemble Kalman filter (64 particles): propagate with the twin step;\nprocess noise = base + \u03ba \u00b7 ensemble variance; update with noisy\njoint positions/velocities, gravity direction and gyro", ACC)
     arrow(ax, (0.29, A + h / 2), (0.365, A + h / 2))
     arrow(ax, (0.635, A + h / 2), (0.71, A + h / 2))
-    arrow(ax, (0.155, A), (0.155, B + h), "x, \u03c4", off=(0.03, -0.01))
+    arrow(ax, (0.155, A), (0.155, B + h), "x, u", off=(0.03, -0.01))
     arrow(ax, (0.40, A), (0.29, B + h), "contact flags c", off=(0.03, 0.0))
     arrow(ax, (0.50, A), (0.50, B + h), "nominal state", off=(0.075, -0.01))
     arrow(ax, (0.29, B + h / 2), (0.365, B + h / 2), "a", off=(0, 0.01))

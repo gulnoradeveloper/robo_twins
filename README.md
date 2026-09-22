@@ -13,7 +13,7 @@ uncertainty-adaptive process noise. Everything runs on a CPU; no robot hardware 
 
 ## What is simulated
 
-* **Plant ("real system")**: MuJoCo quadruped with terrain friction, contact stiffness, payload mass, joint damping
+* **Plant (simulated stand-in for the physical asset; there is no physical robot)**: MuJoCo quadruped with terrain friction, contact stiffness, payload mass, joint damping
   and dry friction, and actuator gain error plus soft torque saturation.
 * **Twin physics core**: the *same* robot with nominal parameters (mu = 0.8, stiffness scale 1, no payload, ideal
   actuators). The plant-vs-nominal difference is the systematic model mismatch the residual must learn.
@@ -50,26 +50,28 @@ predicted variance (aleatoric), sampled stochastically over the rollout.
   unobserved base velocity and height) of the particle mean vs. the plant.
 * **Latency**: wall-clock of one twin step on the machine that ran the code.
 
-Each run is one training/evaluation pass with a fixed seed; the summary reports mean ± SD over three seeds. No confidence
-intervals or significance tests are computed, so differences between methods should be read as descriptive.
+Each run is one training/evaluation pass with a fixed seed; the summary reports mean ± SD over the seeds, and `scripts/paired_stats.py` computes paired seed-level differences with
+t-based 95 % confidence intervals. No correction for multiple comparisons is applied, so differences between methods
+should be read as descriptive.
 
-## Released results (config `default`, seeds 0, 1, 2)
+## Released results (config `default`, seeds 0-6)
 
-`results/seed{0,1,2}/` hold the raw outputs of three independent runs (`results.json`, `results.md`, model weights,
+`results/seed{0..6}/` hold the raw outputs of seven independent runs (seeds 0-2: archived runs on two CPU cores; seeds 3-6: additional runs on one CPU core; seed 0 was regenerated in a clean environment and reproduced the archived metrics) (`results.json`, `results.md`, model weights,
 `dataset_summary.json`); `results/summary/` holds the aggregated tables (`summary.md`, `summary.json`) and the eight
 manuscript figures, all produced by `scripts/summarize.py` and `scripts/make_diagrams.py`. Values are mean ± SD over the
-three runs (0.17 h of training data per run, 5-member ensembles, 64 particles). In plain terms:
+seven runs (0.17 h of training data per run, 5-member ensembles, 64 particles). In plain terms:
 
-* Relative to the physics-only twin, the proposed model lowers rollout RMSE by about 61 % (ID) and 41 % (OOD) and the
-  synchronisation error by about 38 % / 62 %.
+* Relative to the physics-only twin, the proposed model lowers rollout RMSE by about 58 % (ID) and 39 % (OOD) and the
+  synchronisation error by about 45 % / 68 %.
 * The **data-only baseline is more accurate** than all hybrid variants on rollout RMSE and on synchronisation error, so
   the proposed model is *not* uniformly best.
-* Contact-flag conditioning and ensemble uncertainty give **no measurable accuracy gain** (differences are within the
-  run-to-run spread).
-* The heteroscedastic ensembles are **overconfident** (nominal 95 % intervals cover about 73 % ID and 39 % OOD).
+* Contact-flag conditioning gives **no measurable rollout-accuracy gain** (paired CIs include zero); the ensemble does not
+  improve rollout accuracy either (OOD RMSE is higher than for the single-network hybrid).
+* The fixed-noise hybrid filter diverged in 2 of 7 OOD runs (scaled error > 5); the adaptive-noise variants did not.
+* The heteroscedastic ensembles are **overconfident** (nominal 95 % intervals cover about 73 % ID and 41 % OOD).
 * Model mismatch is concentrated within a few control steps of contact switches.
 
-These are properties of this implementation (one-step training, small data set, hand-set filter noise) and of three runs;
+These are properties of this implementation (one-step training, small data set, hand-set filter noise) and of seven runs;
 they are reported as they came out, without tuning towards any method.
 
 ## Quick start
@@ -79,8 +81,9 @@ pip install -r requirements.txt
 pytest -q tests                                              # ~10 s sanity checks
 python scripts/run_all.py --config configs/quick.json   --out results/quick     # ~15 s smoke test
 python scripts/run_all.py --config configs/default.json --seed 0 --out results/seed0   # ~10 min on 2 CPU cores
-bash scripts/run_seeds.sh 0 1 2                                                       # seeds 0-2 -> results/seed{0,1,2}
-python scripts/summarize.py --runs results/seed0 results/seed1 results/seed2 --out results/summary
+bash scripts/run_seeds.sh 0 1 2 3 4 5 6                                               # seeds 0-6 -> results/seed{0..6}
+python scripts/summarize.py --runs results/seed{0,1,2,3,4,5,6} --out results/summary
+python scripts/paired_stats.py results/paired_stats.json results/seed{0,1,2,3,4,5,6}
 python scripts/make_diagrams.py --out results/summary                                 # Fig. 1 and Fig. 2
 ```
 
@@ -94,7 +97,9 @@ Add `--save-data` to also store the generated trajectories as `.npz`.
   and per episode), network initialisation/shuffling (PyTorch), rollout sampling and EnKF noise (fixed streams).
 * The plant, twin, data generation and evaluation are deterministic given the seed on the same software versions;
   multi-threaded PyTorch on different hardware can change floating-point summation order slightly.
-* Tested with Python 3.11, MuJoCo 3.13, PyTorch 2.14 (CPU).
+* Tested with Python 3.12.3, MuJoCo 3.13.0, PyTorch 2.14.0, NumPy 2.4.4, SciPy 1.17.1, Matplotlib 3.10.8, pytest 9.1.1 (CPU); the exact
+  versions are pinned in `requirements.txt`. In a clean environment `pytest` (4 tests) and the quick config passed, and seed 0 of the
+  default config reproduced the archived metrics.
 
 ## Layout
 
@@ -105,7 +110,7 @@ ldt/models.py      ensemble MLP + baselines       ldt/train.py    one-step train
 ldt/rollout.py     twin step / rollouts           ldt/enkf.py     EnKF synchronisation
 ldt/evaluate.py    protocol and metrics           ldt/report.py   per-run tables + calibration figure
 scripts/run_all.py end-to-end pipeline            scripts/run_seeds.sh   several seeds
-scripts/summarize.py  3-seed tables + figures 3-8  scripts/make_diagrams.py  figures 1-2
+scripts/summarize.py  multi-seed tables + figures 3-8 (scripts/paired_stats.py: paired CIs)  scripts/make_diagrams.py  figures 1-2
 configs/           quick + default configurations
 ```
 

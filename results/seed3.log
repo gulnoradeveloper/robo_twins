@@ -1,0 +1,71 @@
+[1/4] generating simulated data (MuJoCo plant vs nominal twin) ...
+    {"train": {"episodes": 60, "samples": 120000, "hours": 0.16666666666666666}, "val": {"episodes": 8, "samples": 16000, "hours": 0.022222222222222223}, "test_id": {"episodes": 12, "samples": 24000, "hours": 0.03333333333333333}, "test_ood": {"episodes": 12, "samples": 22469, "hours": 0.031206944444444443}}
+[2/4] training ...
+  [data] epoch 1/20  train 0.0934  val 0.1361  (2s)
+  [data] epoch 5/20  train 0.0420  val 0.0676  (10s)
+  [data] epoch 9/20  train 0.0403  val 0.0532  (18s)
+  [data] epoch 13/20  train 0.0308  val 0.0475  (25s)
+  [data] epoch 17/20  train 0.0238  val 0.0448  (33s)
+  [data] epoch 20/20  train 0.0188  val 0.0445  (39s)
+  [data] restored best validation epoch 20 (val 0.0445)
+  [hybrid_nouq] epoch 1/20  train 0.1551  val 0.2348  (2s)
+  [hybrid_nouq] epoch 5/20  train 0.1102  val 0.1878  (10s)
+  [hybrid_nouq] epoch 9/20  train 0.0889  val 0.1740  (17s)
+  [hybrid_nouq] epoch 13/20  train 0.1100  val 0.1698  (25s)
+  [hybrid_nouq] epoch 17/20  train 0.0844  val 0.1679  (32s)
+  [hybrid_nouq] epoch 20/20  train 0.0579  val 0.1663  (38s)
+  [hybrid_nouq] restored best validation epoch 19 (val 0.1663)
+  [hybrid_nomode] epoch 1/20  train -1.1857  val -1.0015  (8s)
+  [hybrid_nomode] epoch 5/20  train -1.5257  val -0.9969  (40s)
+  [hybrid_nomode] epoch 9/20  train -1.6989  val -0.1934  (72s)
+  [hybrid_nomode] epoch 13/20  train -1.8029  val 0.4579  (105s)
+  [hybrid_nomode] epoch 17/20  train -1.8349  val 0.7272  (138s)
+  [hybrid_nomode] epoch 20/20  train -1.8703  val 0.7903  (162s)
+  [hybrid_nomode] restored best validation epoch 3 (val -1.0900)
+  [proposed] epoch 1/20  train -1.1632  val -1.0167  (8s)
+  [proposed] epoch 5/20  train -1.4945  val -0.9021  (41s)
+  [proposed] epoch 9/20  train -1.6895  val -0.0267  (74s)
+  [proposed] epoch 13/20  train -1.7978  val 0.5792  (107s)
+  [proposed] epoch 17/20  train -1.8208  val 0.7892  (139s)
+  [proposed] epoch 20/20  train -1.8468  val 0.8337  (163s)
+  [proposed] restored best validation epoch 2 (val -1.0830)
+[3/4] evaluating ...
+  rollouts [physics] done (1s): ID RMSE 0.0654  OOD RMSE 0.1276
+  rollouts [data] done (3s): ID RMSE 0.0137  OOD RMSE 0.0445
+  rollouts [hybrid_nouq] done (6s): ID RMSE 0.0309  OOD RMSE 0.0685
+  rollouts [hybrid_nomode] done (34s): ID RMSE 0.0322  OOD RMSE 0.0762
+  rollouts [proposed] done (34s): ID RMSE 0.0323  OOD RMSE 0.0763
+  EnKF synchronisation ...
+  sync [physics]: ID 0.4554  OOD 2.0636
+  sync [data]: ID 0.1091  OOD 0.1558
+  sync [hybrid_nouq]: ID 0.2682  OOD 17.6116
+  sync [hybrid_nomode]: ID 0.2683  OOD 0.3963
+  sync [proposed]: ID 0.2537  OOD 0.3942
+  contact-transition analysis ...
+[4/4] writing report ...
+# Results (auto-generated)
+
+Config: `default`, seed 3. Single training/evaluation run per method; no statistical tests. Values are simulation-only.
+
+## Table 2 analogue
+
+| Method | ID RMSE (rad) | OOD RMSE (rad) | Aggregate MAE (scaled) | ID 95% cov. (%) | OOD 95% cov. (%) | ID ECE | ID 95% width (rad) | Sync. error ID | Sync. error OOD |
+|---|---|---|---|---|---|---|---|---|---|
+| Physics-only | 0.065 | 0.128 | 0.552 | 91.9 | 67.5 | 0.020 | 0.148 | 0.455 | 2.064 |
+| Data-only | 0.014 | 0.044 | 0.160 | 94.5 | 64.2 | 0.069 | 0.039 | 0.109 | 0.156 |
+| Hybrid without UQ | 0.031 | 0.069 | 0.175 | 94.5 | 60.3 | 0.114 | 0.047 | 0.268 | 17.612 |
+| Hybrid without mode awareness | 0.032 | 0.076 | 0.189 | 72.9 | 42.9 | 0.215 | 0.018 | 0.268 | 0.396 |
+| Proposed configuration | 0.032 | 0.076 | 0.194 | 69.5 | 39.2 | 0.241 | 0.017 | 0.254 | 0.394 |
+
+## Table 3 analogue (proposed vs. each baseline)
+
+| Baseline | ID RMSE red. (%) | OOD RMSE red. (%) | Agg. MAE red. (%) | Sync. error red. (%, ID) | ID 95% cov. gain (pp) |
+|---|---|---|---|---|---|
+| Physics-only | 50.6 | 40.3 | 64.8 | 44.3 | -22.4 |
+| Data-only | -135.5 | -71.4 | -21.3 | -132.5 | -24.9 |
+| Hybrid without UQ | -4.5 | -11.3 | -10.8 | 5.4 | -24.9 |
+| Hybrid without mode awareness | -0.5 | -0.1 | -2.4 | 5.4 | -3.4 |
+
+Single-state twin step latency (proposed, CPU): 0.70 ms
+
+done in 10.2 min

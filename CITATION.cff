@@ -1,7 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it."
 title: "legged-digital-twin: simulation-only physics-informed digital twin for a quadruped"
-version: 0.2.0
+version: 0.3.0
+repository-code: "https://github.com/gulnoradeveloper/robo_twins"
 authors:
   - family-names: "Buronova"
     given-names: "Gulnora"
@@ -18,3 +19,7 @@ authors:
   - family-names: "Rajabov"
     given-names: "Asadbek"
 license: MIT
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22844048
+    description: "Zenodo record cited in the manuscript (verify that it resolves and update to the new version DOI)"

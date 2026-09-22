@@ -15,7 +15,7 @@ import torch.nn.functional as F
 
 KINDS = ["physics", "data", "hybrid_nouq", "hybrid_nomode", "proposed"]
 LABELS = {"physics": "Physics-only", "data": "Data-only", "hybrid_nouq": "Hybrid without UQ",
-          "hybrid_nomode": "Hybrid without Mode Awareness", "proposed": "Proposed Framework"}
+          "hybrid_nomode": "Hybrid without mode awareness", "proposed": "Proposed configuration"}
 SPEC = {  # uses_mode, ensemble size key, heteroscedastic, target
     "data": dict(mode=False, ens=False, hetero=False, target="a_tot"),
     "hybrid_nouq": dict(mode=True, ens=False, hetero=False, target="a_res"),

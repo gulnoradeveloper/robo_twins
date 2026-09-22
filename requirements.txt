@@ -1,6 +1,7 @@
-mujoco>=3.1
-torch>=2.2
-numpy
-scipy
-matplotlib
-pytest
+# Exact versions used to produce the archived results (verified in a clean environment, Python 3.12.3, CPU).
+mujoco==3.13.0
+torch==2.14.0
+numpy==2.4.4
+scipy==1.17.1
+matplotlib==3.10.8
+pytest==9.1.1
