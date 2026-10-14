@@ -9,11 +9,13 @@ import numpy as np
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+matplotlib.rcParams["pdf.fonttype"] = 42  # embed TrueType fonts in vector output
+from _hsave import hsave
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from ldt.models import KINDS, LABELS
 from ldt.data import ID_RANGES
 
-COL = {"physics": "#2a78d6", "data": "#eb6834", "hybrid_nouq": "#1baf7a", "hybrid_nomode": "#4a3aa7", "proposed": "#e34948"}
+COL = {"physics": "#0072B2", "data": "#E69F00", "hybrid_nouq": "#4D4D4D", "hybrid_nomode": "#CC79A7", "proposed": "#D55E00"}  # CVD-safe, no red-green pairing (Heliyon)
 MRK = {"physics": "o", "data": "s", "hybrid_nouq": "^", "hybrid_nomode": "D", "proposed": "v"}
 LS = {"physics": "-", "data": "--", "hybrid_nouq": "-.", "hybrid_nomode": ":", "proposed": "-"}
 plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.right": False, "axes.grid": True,
@@ -79,7 +81,7 @@ def main():
     json.dump(S, open(f"{a.out}/summary.json", "w"), indent=1)
 
     fmt = lambda t, d=3: f"{t[0]:.{d}f} ± {t[1]:.{d}f}"
-    md = f"# Summary over {n} seeds (mean ± SD across seeds; descriptive, no significance tests)\n\n"
+    md = f"# Summary over {n} seeds (mean ± SD across seeds; paired seed-level CIs are in results/paired_stats.json)\n\n"
     md += "| Method | ID RMSE (rad) | OOD RMSE (rad) | Agg. MAE | ID 95% cov. (%) | OOD 95% cov. (%) | ID ECE | OOD ECE | ID width (rad) | ID NLL | OOD NLL | Sync ID | Sync OOD | EnKF ms/step |\n|" + "---|" * 14 + "\n"
     for k in KINDS:
         s = S[k]
@@ -101,7 +103,7 @@ def main():
 
     # ---- Fig. 3: RMSE vs horizon
     fig, axs = plt.subplots(1, 2, figsize=(7.2, 2.9), sharey=True)
-    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("In-distribution", "Out-of-distribution")):
+    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("(a) In-distribution", "(b) Out-of-distribution")):
         for k in KINDS:
             H = np.array([r[k][sp]["rmse_by_horizon"] for r in R]); x = np.arange(1, H.shape[1] + 1) * 5
             ax.plot(x, H.mean(0), color=COL[k], ls=LS[k], marker=MRK[k], ms=2.5, lw=1.3, markevery=3)
@@ -109,7 +111,7 @@ def main():
         ax.set_title(t, fontsize=8.5); ax.set_xlabel("Prediction horizon (ms)")
     axs[0].set_ylabel("Joint-position RMSE (rad)"); axs[0].set_yscale("log")
     fig.tight_layout(rect=(0, 0.13, 1, 1)); legend(fig, loc="lower center", ncol=5, fontsize=7.5)
-    fig.savefig(f"{a.out}/fig3_rollout_horizon.png"); plt.close(fig)
+    hsave(fig, f"{a.out}/fig3_rollout_horizon.png"); plt.close(fig)
 
     # ---- Fig. 4: contact-transition analysis (ID test episodes)
     fig, axs = plt.subplots(1, 2, figsize=(7.2, 2.9))
@@ -126,7 +128,7 @@ def main():
     axs[1].plot(x, tv.mean(0), color=COL["physics"], marker=MRK["physics"], ms=3.5, lw=1.3, label=LABELS["physics"] + " (predicts zero)")
     axs[1].set_xticks(x, bins); axs[1].set_xlabel("Control steps to nearest contact-mode switch"); axs[1].set_ylabel("One-step residual error (relative)")
     axs[1].set_title("(b) Residual prediction error", fontsize=8.5); axs[1].set_ylim(0, 2.4); axs[1].legend(fontsize=6.5, loc="upper right", ncol=1)
-    fig.tight_layout(); fig.savefig(f"{a.out}/fig4_contact_transitions.png"); plt.close(fig)
+    fig.tight_layout(); hsave(fig, f"{a.out}/fig4_contact_transitions.png"); plt.close(fig)
 
     # ---- Fig. 5: domain shift (per-episode RMSE vs shift magnitude)
     fig, ax = plt.subplots(figsize=(4.6, 3.2))
@@ -150,15 +152,15 @@ def main():
         ax.scatter(p[:, 0], p[:, 1], s=5, color=COL[k], alpha=0.25, lw=0)
         ax.plot(xs, ys, color=COL[k], ls=LS[k], marker=MRK[k], ms=4, lw=1.4)
     ax.set_yscale("log"); ax.set_xlabel("Shift magnitude (RMS distance outside ID range, in range widths)")
-    ax.set_ylabel("Episode joint-position RMSE (rad)"); ax.set_title(f"{n} seed{'s' if n != 1 else ''}; points = episodes, lines = bin means", fontsize=8)
+    ax.set_ylabel("Episode joint-position RMSE (rad)")
     fig.tight_layout(rect=(0, 0.16, 1, 1)); legend(fig, loc="lower center", ncol=3, fontsize=7)
-    fig.savefig(f"{a.out}/fig5_domain_shift.png"); plt.close(fig)
+    hsave(fig, f"{a.out}/fig5_domain_shift.png"); plt.close(fig)
     json.dump({k: v for k, v in per.items()}, open(f"{a.out}/domain_shift_points.json", "w"))
 
     # ---- Fig. 6: calibration curves
     fig, axs = plt.subplots(1, 2, figsize=(7.2, 3.3), sharey=True)
     lv = [float(x) for x in R[0]["proposed"]["test_id"]["coverage"]]
-    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("In-distribution", "Out-of-distribution")):
+    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("(a) In-distribution", "(b) Out-of-distribution")):
         ax.plot([0.45, 1], [0.45, 1], color="k", lw=0.8, ls="--")
         for k in KINDS:
             c = np.array([[v for v in r[k][sp]["coverage"].values()] for r in R])
@@ -166,11 +168,11 @@ def main():
         ax.set_title(t, fontsize=8.5); ax.set_xlabel("Nominal coverage"); ax.set_xlim(0.45, 1); ax.set_ylim(0.0, 1.0)
     axs[0].set_ylabel("Empirical coverage")
     fig.tight_layout(rect=(0, 0.13, 1, 1)); legend(fig, loc="lower center", ncol=5, fontsize=7.5)
-    fig.savefig(f"{a.out}/fig6_calibration.png"); plt.close(fig)
+    hsave(fig, f"{a.out}/fig6_calibration.png"); plt.close(fig)
 
     # ---- Fig. 7: synchronisation error over time
     fig, axs = plt.subplots(1, 2, figsize=(7.2, 2.9), sharey=True)
-    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("In-distribution", "Out-of-distribution")):
+    for ax, sp, t in zip(axs, ("test_id", "test_ood"), ("(a) In-distribution", "(b) Out-of-distribution")):
         for k in KINDS:
             L = min(len(r[k][sp]["sync_series"]) for r in R)
             H = np.array([r[k][sp]["sync_series"][:L] for r in R])
@@ -182,11 +184,11 @@ def main():
         ax.set_title(t, fontsize=8.5); ax.set_xlabel("Time (s)")
     axs[0].set_ylabel("Scaled state error"); axs[0].set_yscale("log")
     fig.tight_layout(rect=(0, 0.13, 1, 1)); legend(fig, loc="lower center", ncol=5, fontsize=7.5)
-    fig.savefig(f"{a.out}/fig7_sync.png"); plt.close(fig)
+    hsave(fig, f"{a.out}/fig7_sync.png"); plt.close(fig)
 
     # ---- Fig. 8: ablation summary
     fig, axs = plt.subplots(1, 4, figsize=(7.4, 2.7))
-    panels = [("rmse_id", "ID RMSE (rad)"), ("rmse_ood", "OOD RMSE (rad)"), ("sync_id", "Sync. error (ID)"), ("ece_id", "ECE (ID)")]
+    panels = [("rmse_id", "(a) ID RMSE (rad)"), ("rmse_ood", "(b) OOD RMSE (rad)"), ("sync_id", "(c) Sync. error (ID)"), ("ece_id", "(d) ECE (ID)")]
     for ax, (key, t) in zip(axs, panels):
         for i, k in enumerate(KINDS):
             m, s = S[k][key]
@@ -195,7 +197,7 @@ def main():
     fig.tight_layout(rect=(0, 0.13, 1, 1))
     h = [plt.Rectangle((0, 0), 1, 1, color=COL[k]) for k in KINDS]
     fig.legend(h, [LABELS[k] for k in KINDS], loc="lower center", ncol=5, fontsize=7.5, frameon=False)
-    fig.savefig(f"{a.out}/fig8_ablation.png"); plt.close(fig)
+    hsave(fig, f"{a.out}/fig8_ablation.png"); plt.close(fig)
     print(md)
 
 

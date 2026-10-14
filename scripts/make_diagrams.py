@@ -4,6 +4,8 @@ import argparse, os
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+matplotlib.rcParams["pdf.fonttype"] = 42  # embed TrueType fonts in vector output
+from _hsave import hsave
 from matplotlib.patches import FancyBboxPatch, FancyArrowPatch
 
 plt.rcParams.update({"font.size": 7.5, "savefig.dpi": 300})
@@ -45,14 +47,14 @@ def workflow(path):
     ax.text(0.5, 0.52, "training data", ha="center", va="bottom", fontsize=6.5, style="italic")
     ax.text(0.0, 0.99, "Data generation", fontsize=7.5, fontweight="bold", va="top")
     ax.text(0.995, 0.44, "Learning and evaluation", fontsize=7.5, fontweight="bold", va="top", ha="right")
-    fig.savefig(path, bbox_inches="tight", pad_inches=0.05); plt.close(fig)
+    hsave(fig, path, bbox_inches="tight", pad_inches=0.05); plt.close(fig)
 
 
 def architecture(path):
     fig, ax = plt.subplots(figsize=(6.4, 3.4)); ax.set_xlim(-0.02, 1.02); ax.set_ylim(0, 1); ax.axis("off")
     w, h = 0.27, 0.20
     A, B = 0.74, 0.40
-    box(ax, 0.02, A, w, h, "Twin state and torque command\n(q, v, u)")
+    box(ax, 0.02, A, w, h, "Twin state and\ntorque command (q, v, u)")
     box(ax, 0.365, A, w, h, "Nominal physics core\n(MuJoCo, nominal\nparameters)")
     box(ax, 0.71, A, w, h, "Nominal next state\n(q$_{nom}$\u2019, v$_{nom}$\u2019)")
     box(ax, 0.02, B, w, h, "Residual ensemble\n(M = 5): mean \u03bc$_m$,\nvariance \u03c3$_m^2$ of a", ACC)
@@ -67,7 +69,7 @@ def architecture(path):
     arrow(ax, (0.29, B + h / 2), (0.365, B + h / 2), "a", off=(0, 0.01))
     arrow(ax, (0.635, B + h / 2), (0.71, B + h / 2))
     arrow(ax, (0.845, B), (0.75, 0.23), "twin step", off=(0.065, 0.0))
-    fig.savefig(path, bbox_inches="tight", pad_inches=0.05); plt.close(fig)
+    hsave(fig, path, bbox_inches="tight", pad_inches=0.05); plt.close(fig)
 
 
 if __name__ == "__main__":

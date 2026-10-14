@@ -87,6 +87,11 @@ python scripts/paired_stats.py results/paired_stats.json results/seed{0,1,2,3,4,
 python scripts/make_diagrams.py --out results/summary                                 # Fig. 1 and Fig. 2
 ```
 
+Figures are written as `.png` (600 dpi) and vector `.pdf`. For journal artwork, `LDT_TIFF=1 python scripts/summarize.py ...`
+(and the same for `make_diagrams.py`) also writes 1200-dpi `.tif` files. Since v0.3.2 the figures use a colour-vision-safe
+palette without red-green pairings and panel labels (a), (b), ... as required by Heliyon; the plotted data and all numbers
+are identical to v0.3.1.
+
 Outputs in `--out`: `results.json` (all metrics), `results.md` (tables), `calibration_curve.png`,
 `dataset_summary.json` (conditions of every episode), `model_*.pt` (weights + normalisers).
 Add `--save-data` to also store the generated trajectories as `.npz`.
@@ -128,6 +133,19 @@ configs/           quick + default configurations
   exploded particles (`ldt/enkf.py`). Process-noise magnitudes and the adaptation gain `adapt_kappa` were set by hand
   (not tuned per method).
 * Latency numbers are for single-process Python on CPU and are not comparable to GPU/embedded figures.
+
+## Citation
+
+Please cite the archived software: G. Buronova, Z. Barnoeva, I. Juraev, M. Sharipov, L. Yadgarova, Z. Muradova, A. Rajabov,
+legged-digital-twin: simulation-only physics-informed digital twin for a quadruped, v0.3.1 [software], Zenodo, 2026.
+https://doi.org/10.5281/zenodo.22895246 (see also `CITATION.cff`).
+
+## Changelog
+
+* **v0.3.2** - figure styling for journal submission (colour-vision-safe palette, panel labels, no in-figure title in Fig. 5,
+  fixed label overflow in Fig. 2), vector PDF and optional 1200-dpi TIFF export, corrected `CITATION.cff`. No change to
+  code paths that produce results; `summary.json` and `paired_stats.json` are byte-identical to v0.3.1.
+* **v0.3.1** - 7 seeds (0-6), pinned dependency versions, paired statistics (`scripts/paired_stats.py`). Zenodo DOI 10.5281/zenodo.22895246.
 
 ## License
 
