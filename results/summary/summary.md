@@ -1,4 +1,4 @@
-# Summary over 7 seeds (mean ± SD across seeds; descriptive, no significance tests)
+# Summary over 7 seeds (mean ± SD across seeds; paired seed-level CIs are in results/paired_stats.json)
 
 | Method | ID RMSE (rad) | OOD RMSE (rad) | Agg. MAE | ID 95% cov. (%) | OOD 95% cov. (%) | ID ECE | OOD ECE | ID width (rad) | ID NLL | OOD NLL | Sync ID | Sync OOD | EnKF ms/step |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
